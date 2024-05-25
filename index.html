@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Talk Random</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #E8E8E9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #293242;
+        }
+        .container {
+            max-width: 600px;
+            background-color: #FBCCC2;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #75464A;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #464543;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #AA7C7A;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #75464A;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #464543;
+        }
+        .player-names {
+            margin-top: 20px;
+        }
+        .player-names div {
+            margin-top: 10px;
+        }
+        .results {
+            margin-top: 20px;
+            background-color: #E8E8E9;
+            padding: 10px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Deep Talk Random</h1>
+        <label for="numPlayers">Enter number of players:</label>
+        <input type="number" id="numPlayers" min="1" max="10">
+        <button onclick="setPlayerNames()">Submit</button>
+        <div class="player-names">
+            <form id="playerNamesForm">
+                <div id="playerNamesContainer"></div>
+                <label for="category">Select question category:</label>
+                <select id="category">
+                    <option value="personal">Personal</option>
+                    <!-- Add more categories as needed -->
+                </select>
+                <button type="button" onclick="assignQuestions()">Play</button>
+            </form>
+        </div>
+        <div class="results" id="results"></div>
+    </div>
+    <script>
+        const questions = [
+            "อะไรทำให้ความสัมพันธ์ครั้งที่แล้วของคุณจบลง?",
+            "เป้าหมายที่คุณกำลังมุ่งมั่นในตอนนี้คืออะไร?",
+            "คุณอยากได้รับการปลอบโยนแบบไหน?",
+            "คุณมองหาคุณสมบัติอะไรในตัวคู่รัก?",
+            "วัยเด็กของคุณมีความสุขไหม?",
+            "อะไรทำให้คุณรู้สึกปลอดภัย?",
+            "คุณแบ่งเวลาอย่างไรระหว่างงานกับชีวิตส่วนตัว?",
+            "คุณเป็นคนชอบเสี่ยงไหม?",
+            "คุณรับมือกับความล้มเหลวอย่างไร?",
+            "อุปสรรคที่ยิ่งใหญ่ที่สุดที่คุณต้องฟันฝ่าคืออะไร?",
+            "เคยโกหกในกรณีไหนที่ถือว่าโอเค?",
+            "การตัดสินใจที่แย่ที่สุดที่คุณเคยทำคืออะไร?",
+            "คุณมีความสุขที่สุดเมื่อไหร่?",
+            "อะไรที่ทำให้คุณกลัวมากกว่าสิ่งอื่นใด?",
+            "ใครหรืออะไรที่เป็นแรงบันดาลใจให้คุณ?",
+            "ถ้าคุณมีโอกาสแก้ไขเพียงหนึ่งอย่าง มันจะเป็นอะไร?",
+            "บทเรียนที่สำคัญที่สุดที่คุณเรียนรู้เกี่ยวกับตัวเองคืออะไร?",
+            "คุณยอมสละชีวิตตัวเองเพื่อคนอื่นไหม?",
+            "คุณสูญเสียคุณสมบัติส่วนตัวใดไปตามกาลเวลาที่คุณอยากให้มันกลับมา?",
+            "อะไรทำให้ชีวิตของคุณมีความหมาย?",
+            "คุณจะยอมสละอะไรเพื่อไล่ตามความฝัน?",
+            "อะไรที่ทำให้คุณโกรธจริงๆ?",
+            "ประสบการณ์ชีวิตใดที่เปลี่ยนคุณไปมากที่สุด?",
+            "คุณอยากให้คนอื่นมองคุณว่าเป็นคนใจดี ฉลาด หรือดึงดูดใจ?",
+            "คุณคิดว่าคนเปลี่ยนแปลงได้ไหม?",
+            "อะไรคือสิ่งที่ทำให้คุณรู้สึกทึ่ง?",
+            "คุณอยากให้คนจดจำคุณอย่างไร?",
+            "คุณเชื่อในการให้โอกาสคนที่สองไหม?",
+            "อะไรทำให้คุณอิจฉา?",
+            "ถ้าให้เลือกคนที่คุณอยากให้มากินข้าวเย็นด้วยมากที่สุดในโลกนี้คือ ?",
+            "คุณอยากมีชื่อเสียงหรือไม่ ? มีชื่อเสียงในทางไหน ?",
+            "ก่อนที่จะโทรหาใคร คุณจะทวนสิ่งที่จะพูดก่อนหรือไม่ ? เพราะอะไร ?",
+            "วันที่สมบูรณ์แบบของคุณ ต้องประกอบด้วยอะไรบ้าง ?",
+            "ครั้งสุดท้ายที่คุณร้องเพลงกับตัวเอง หรือร้องให้คนอื่นคือเมื่อไหร่ ?",
+            "ถ้าคุณมีอายุถึง 90 ปี โดยที่ร่างกายและจิตใจของคุณยังคงเหมือนตัวเองตอนอายุ 30 อยู่ ใน 60 ปี สุดท้ายของชีวิตคุณอยากจะทำอะไร ?",
+            "คุณมีความลับเกี่ยวกับความตายของคุณไหม ?",
+            "บอกสิ่งที่คุณและคู่ มีเหมือนกัน 3 ข้อ ?",
+            "รู้สึกขอบคุณอะไรในชีวิตมากที่สุด ?",
+            "ถ้าให้เปลี่ยนสิ่งที่ทำให้คุณเติบโตมา คุณจะเปลี่ยนอะไร ?",
+            "ถ้าคุณตื่นขึ้นมา แล้วได้รับความสามารถ 1 อย่าง สิ่งนั้นจะเป็นอะไร เพราะอะไร?",
+            "ถ้ามีลูกแก้ววิเศษที่จะบอกอนาคตของคุณได้ คุณอยากรู้เรื่องอะไรมากที่สุด ?",
+            "คุณมีความฝันที่อยากทำมานานแล้วหรือไม่ ? และทำไมยังไม่ได้ทำมันซักที ?",
+            "สเปค?",
+            "ถ้าชอบใครจะบอกเขาตรงๆไหม?",
+            "เคยมีแฟนมากี่คน?",
+            "เคยชอบเพื่อนไหม?",
+            "เคยชอบคนที่เพิ่งรู้จักไหม?",
+            "อะไรคือความสำเร็จสูงสุดของชีวิตคุณ ?",
+            "คุณให้คุณค่าอะไรมากที่สุดในมิตรภาพ ?",
+            "อะไรคือความทรงจำที่มีค่าของคุณที่สุด ?",
+            "ถ้าคุณเพิ่งรู้ว่าจะมีชีวิตอีกได้แค่ 1 ปี คุณจะเปลี่ยนวิธีการใช้ชีวิตของคุณหรือไม่ ? เพราะอะไร ?",
+            "มิตรภาพสำคัญกับคุณอย่างไร ?",
+            "ความรักและความหลงไหล อยู่ในบทบาทไหนในชีวิตคุณ ?",
+            "รื่องอะไรที่คุณซีเรียส เอามาล้อเล่นไม่ได้ ?",
+            "ถ้าคุณต้องเสียชีวิตลงในเย็นวันนี้ โดยไม่สามารถสื่อสารกับใครได้เลย คุณจะเสียใจที่ไม่ได้บอกอะไรกับใครไหม ? แล้วทำไมถึงไม่ยอมบอกสักที ?",
+            "ถ้าบ้านของคุณไฟไหม้ทั้งหลัง หลังจากช่วยชีวิตคนที่คุณรักหรือสัตว์เลี้ยงแล้ว คุณสามาถรักษาของได้หนึ่งอย่าง สิ่งนั้นคือ ?"
+        ];
+
+        function setPlayerNames() {
+            const numPlayers = document.getElementById('numPlayers').value;
+            const playerNamesContainer = document.getElementById('playerNamesContainer');
+            playerNamesContainer.innerHTML = '';
+            for (let i = 1; i <= numPlayers; i++) {
+                playerNamesContainer.innerHTML += `
+                    <div>
+                        <label for="player${i}Name">Player ${i} Name:</label>
+                        <input type="text" id="player${i}Name" name="player${i}Name" required>
+                    </div>`;
+            }
+            document.querySelector('.player-names').style.display = 'block';
+        }
+
+        function assignQuestions() {
+            const numPlayers = document.getElementById('numPlayers').value;
+            const players = [];
+            for (let i = 1; i <= numPlayers; i++) {
+                players.push(document.getElementById(`player${i}Name`).value);
+            }
+
+            const assignedQuestions = players.map(player => {
+                const randomIndex = Math.floor(Math.random() * questions.length);
+                return `${player}: ${questions[randomIndex]}`;
+            });
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = assignedQuestions.join('<br>');
+        }
+    </script>
+</body>
+</html>
